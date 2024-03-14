@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.Json.Nodes;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Security.Principal;
 
 namespace b2c_ApiConnector
 {
@@ -18,13 +19,17 @@ namespace b2c_ApiConnector
 
         public BusinessUnit(ILoggerFactory loggerFactory)
         {
-            _logger = loggerFactory.CreateLogger<SignIn>();
+            _logger = loggerFactory.CreateLogger<BusinessUnit>();
         }
 
         [Function("businessUnit")]
         public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
+
+            req.Headers.TryGetValues("Authorization", out IEnumerable<string> authorization);
+
+            _logger.LogInformation($"Token: {authorization?.FirstOrDefault()}"); //Authorization
 
             string body;
             using (var streamReader = new StreamReader(req.Body))
@@ -43,10 +48,9 @@ namespace b2c_ApiConnector
                 BusinessUnits = new[]{
                     new {Id="1", Name="Business 1"}, new {Id="2", Name="Business 2"}
                 },
-                BusinessNames = new[] { "Business name a", "Business name b" },
-                Businesses = new[]{
-                    new {Id="businessName1", Name="Business name 1"},
-                    new {Id="businessName2", Name="Business name 2"}
+                User = new
+                {
+                    Token = authorization?.FirstOrDefault()
                 },
                 Action = "Continue",
             };

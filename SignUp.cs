@@ -18,7 +18,7 @@ namespace b2c_ApiConnector
 
         public SignUp(ILoggerFactory loggerFactory)
         {
-            _logger = loggerFactory.CreateLogger<SignIn>();
+            _logger = loggerFactory.CreateLogger<SignUp>();
         }
 
         [Function("signUp")]

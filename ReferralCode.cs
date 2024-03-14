@@ -18,7 +18,7 @@ namespace b2c_ApiConnector
 
         public ReferralCode(ILoggerFactory loggerFactory)
         {
-            _logger = loggerFactory.CreateLogger<SignIn>();
+            _logger = loggerFactory.CreateLogger<ReferralCode>();
         }
 
         [Function("referralcode")]
