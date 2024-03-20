@@ -34,14 +34,17 @@ namespace b2c_ApiConnector
 
             _logger.LogInformation("referralcode Request: {0}", body);
 
-            var obj = JsonSerializer.Deserialize<ReferralCodeRequest>(body, new JsonSerializerOptions(){
-                PropertyNameCaseInsensitive=true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            var obj = JsonSerializer.Deserialize<ReferralCodeRequest>(body, new JsonSerializerOptions()
+            {
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             });
 
             var response = req.CreateResponse(HttpStatusCode.OK);
             response.Headers.Add("Content-Type", "application/json; charset=utf-8");
 
-            if(obj.ReferralCode.EndsWith("Code", StringComparison.OrdinalIgnoreCase)){
+            if (obj.ReferralCode.EndsWith("Code", StringComparison.OrdinalIgnoreCase))
+            {
                 return response;
             }
 
@@ -54,7 +57,12 @@ namespace b2c_ApiConnector
                 developerMessage = "Referral code is missing or invalid - Developer"
             };
 
-            JsonSerializer.Serialize(response.Body, responseObj, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            JsonSerializer.Serialize(response.Body, responseObj, new JsonSerializerOptions()
+            {
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            });
 
             return response;
         }

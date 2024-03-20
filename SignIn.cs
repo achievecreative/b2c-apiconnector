@@ -32,14 +32,43 @@ namespace b2c_ApiConnector
             _logger.LogInformation("Sign In Request");
             _logger.LogInformation(body);
 
-            var requestObj = JsonSerializer.Deserialize<JsonObject>(body);
+            SignInRequest? requestObj = null;
+            try
+            {
+                requestObj = JsonSerializer.Deserialize<SignInRequest>(body, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message, e);
+            }
 
+            var responseObj = new SignInResponse();
+            if (requestObj == null)
+            {
+                responseObj.Status = 500;
+                responseObj.userMessage = "Unable to procee the request";
+            }
+            else
+            {
+                if (requestObj.Password?.Equals("fm@PSV36") ?? false)
+                {
+                    responseObj.Success = true;
+                }
+                else
+                {
+                    responseObj.Status = 400;
+                    responseObj.userMessage = "Invalid username or password";
+                }
+            }
             var response = req.CreateResponse(HttpStatusCode.OK);
             response.Headers.Add("Content-Type", "application/json; charset=utf-8");
 
-            var responseObj = new { Version = "1.0.0", City = "City from Azure Function",  Name = "Name From Azure Function", Action = "Continue", };
-
-            JsonSerializer.Serialize(response.Body, responseObj, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            JsonSerializer.Serialize(response.Body, responseObj, new JsonSerializerOptions()
+            {
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            });
 
             return response;
         }
