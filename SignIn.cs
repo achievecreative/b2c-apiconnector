@@ -50,7 +50,7 @@ namespace b2c_ApiConnector
             }
             else
             {
-                if (requestObj.Password?.Equals("fm@PSV36") ?? false)
+                if (requestObj.Password?.Equals("1") ?? false)
                 {
                     responseObj.Success = true;
                 }
