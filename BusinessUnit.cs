@@ -50,7 +50,12 @@ namespace b2c_ApiConnector
                 },
                 User = new
                 {
-                    Token = authorization?.FirstOrDefault()
+                    Source = "API",
+                    FirstName = "Firstname",
+                    LastName = "Last name",
+                    registrationComplete = false,
+                    registrationStep = 2,
+                    isEligableForUpgrade = false
                 },
                 Action = "Continue",
             };
