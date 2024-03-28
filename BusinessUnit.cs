@@ -23,7 +23,7 @@ namespace b2c_ApiConnector
         }
 
         [Function("businessUnit")]
-        public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
+        public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req, [FromBody] BusinessUnitRequest businessUnit)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -42,12 +42,21 @@ namespace b2c_ApiConnector
             var response = req.CreateResponse(HttpStatusCode.OK);
             response.Headers.Add("Content-Type", "application/json; charset=utf-8");
 
+            var units = new[]{
+                    new {Id="1", Name="Business 1"}, new {Id="2", Name="Business 2"}
+                };
+
+            if (!string.IsNullOrEmpty(businessUnit?.BusinessId))
+            {
+                units = new[]{
+                    new {Id=businessUnit.BusinessId, Name=$"Business {businessUnit.BusinessId}"}
+                };
+            }
+
             var responseObj = new
             {
                 Version = "1.0.0",
-                BusinessUnits = new[]{
-                    new {Id="1", Name="Business 1"}, new {Id="2", Name="Business 2"}
-                },
+                BusinessUnits = units,
                 User = new
                 {
                     Source = "API",
@@ -55,7 +64,8 @@ namespace b2c_ApiConnector
                     LastName = "Last name",
                     registrationComplete = false,
                     registrationStep = 2,
-                    isEligableForUpgrade = false
+                    isEligableForUpgrade = false,
+                    BusinessUnit = units
                 },
                 Action = "Continue",
             };
