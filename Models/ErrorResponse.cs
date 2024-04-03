@@ -1,6 +1,8 @@
-﻿namespace b2c_ApiConnector;
+﻿using b2c_ApiConnector.Models;
 
-public class ErrorResponse
+namespace b2c_ApiConnector;
+
+public class ErrorResponse : ResponseObject
 {
     public int? Status { get; set; } = null;
 

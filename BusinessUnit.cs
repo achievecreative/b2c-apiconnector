@@ -10,6 +10,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Security.Principal;
+using b2c_ApiConnector.Models;
 
 namespace b2c_ApiConnector
 {
@@ -42,35 +43,37 @@ namespace b2c_ApiConnector
             var response = req.CreateResponse(HttpStatusCode.OK);
             response.Headers.Add("Content-Type", "application/json; charset=utf-8");
 
-            var units = new[]{
-                    new {Id="1", Name="Business 1"}, new {Id="2", Name="Business 2"}
-                };
-
-            if (!string.IsNullOrEmpty(businessUnit?.BusinessId))
-            {
-                units = new[]{
-                    new {Id=businessUnit.BusinessId, Name=$"Business {businessUnit.BusinessId}"}
-                };
-            }
-
-            var responseObj = new
+            var responseObj = new BusinessUnitResponse
             {
                 Version = "1.0.0",
-                BusinessUnits = units,
-                User = new
-                {
-                    Source = "API",
-                    FirstName = "Firstname",
-                    LastName = "Last name",
-                    registrationComplete = false,
-                    registrationStep = 2,
-                    isEligableForUpgrade = false,
-                    BusinessUnit = units
-                },
+                Businesses = new BusinessUnitItem[] {
+                    new BusinessUnitItem{ BusinessName = "Business 1", BusinessId="B111"},
+                    new BusinessUnitItem{ BusinessName = "Business 2", BusinessId="C2222"},
+                    new BusinessUnitItem{ BusinessName = "Business 3", BusinessId="C1111"}
+                 },
                 Action = "Continue",
             };
 
-            JsonSerializer.Serialize(response.Body, responseObj, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            if (!string.IsNullOrEmpty(businessUnit?.BusinessId))
+            {
+                responseObj.Businesses = new BusinessUnitItem[] { new BusinessUnitItem { BusinessId = businessUnit.BusinessId, BusinessName = "Business name" + businessUnit.BusinessId } };
+                responseObj.AccountStatus = "registration_pending";
+                responseObj.Persona = "AHP2";
+                responseObj.BusinessId = businessUnit.BusinessId;
+                responseObj.ExtemporaneousAllowed = true;
+                responseObj.Brands = new[] { "BC", "BP" };
+                responseObj.PayByTerms = false;
+                responseObj.BusinessOwner = true;
+                responseObj.CanPurchase = true;
+                responseObj.MarketoForm = "M1123";
+            }
+
+            JsonSerializer.Serialize(response.Body, responseObj, new JsonSerializerOptions()
+            {
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            });
 
             return response;
         }
