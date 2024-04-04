@@ -67,6 +67,13 @@ namespace b2c_ApiConnector
                 responseObj.CanPurchase = true;
                 responseObj.MarketoForm = "M1123";
             }
+            else
+            {
+                responseObj.AccountStatus = "registration_pending";
+                responseObj.Persona = "AHP2";
+                responseObj.ExtemporaneousAllowed = true;
+                responseObj.Brands = new[] { "BC", "BP" };
+            }
 
             JsonSerializer.Serialize(response.Body, responseObj, new JsonSerializerOptions()
             {

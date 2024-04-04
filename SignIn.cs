@@ -41,10 +41,12 @@ namespace b2c_ApiConnector
             {
                 _logger.LogError(e.Message, e);
             }
+            var response = req.CreateResponse(HttpStatusCode.OK);
 
             var responseObj = new SignInResponse();
             if (requestObj == null)
             {
+                response.StatusCode = HttpStatusCode.BadRequest;
                 responseObj.Status = 500;
                 responseObj.userMessage = "Unable to procee the request";
             }
@@ -56,11 +58,12 @@ namespace b2c_ApiConnector
                 }
                 else
                 {
+                    response.StatusCode = HttpStatusCode.BadRequest;
                     responseObj.Status = 400;
                     responseObj.userMessage = "Invalid username or password";
                 }
             }
-            var response = req.CreateResponse(HttpStatusCode.OK);
+
             response.Headers.Add("Content-Type", "application/json; charset=utf-8");
 
             JsonSerializer.Serialize(response.Body, responseObj, new JsonSerializerOptions()

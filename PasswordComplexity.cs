@@ -1,4 +1,9 @@
-﻿using Microsoft.Azure.Functions.Worker;
+﻿using System.Net;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using Azure.Core.Serialization;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 
@@ -13,23 +18,30 @@ public class PasswordComplexity
         _logger = loggerFactory.CreateLogger<PasswordComplexity>();
     }
 
-
     [Function("password-complexity")]
-    public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req, [FromBody] PasswordComplexityRequest passwordComplexityRequest)
+    public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req, [FromBody] PasswordComplexityRequest passwordComplexityRequest)
     {
+        var response = new PasswordComplexityResponse();
+
         if (!string.IsNullOrEmpty(passwordComplexityRequest.Fullname))
         {
-            var similatity = LevenshteinDistance(passwordComplexityRequest.Password, passwordComplexityRequest.Fullname);
-            if (similatity > 0.5)
+            var similatity = response.similatity = LevenshteinDistance(passwordComplexityRequest.Password, passwordComplexityRequest.Fullname);
+            if (similatity < 0.5)
             {
-                throw new NotImplementedException();
+                return await CreateResponse(req, HttpStatusCode.BadRequest, response);
             }
         }
 
         //Check Haveibeenpwned
 
+        var isPasswordCompromised = response.Compromised = await IsPasswordCompromisedAsync(passwordComplexityRequest.Password);
 
-        throw new NotImplementedException();
+        if (isPasswordCompromised)
+        {
+            return await CreateResponse(req, HttpStatusCode.BadRequest, response);
+        }
+
+        return await CreateResponse(req, HttpStatusCode.OK, response);
     }
 
     private double LevenshteinDistance(string password, string fullName)
@@ -63,5 +75,39 @@ public class PasswordComplexity
         var distance = dp[password.Length, fullName.Length];
 
         return distance / (double)fullName.Length;
+    }
+
+    private async Task<bool> IsPasswordCompromisedAsync(string password)
+    {
+        var hash = GeneratePasswordHash(password);
+
+        var prefix = hash.Substring(0, 5);
+        var suffix = hash.Substring(5);
+
+        using var httpClient = new HttpClient();
+        var response = await httpClient.GetStringAsync($"https://api.pwnedpasswords.com/range/{prefix}");
+        var hashArray = response?.Split("\r\n");
+        var exists = hashArray?.Any(x => x.StartsWith(suffix));
+
+        return exists ?? false;
+    }
+    private string GeneratePasswordHash(string password)
+    {
+        using var sha1 = SHA1.Create();
+
+        var hashed = sha1.ComputeHash(Encoding.UTF8.GetBytes(password));
+
+        return Convert.ToHexString(hashed);
+    }
+
+    private async Task<HttpResponseData> CreateResponse(HttpRequestData req, HttpStatusCode httpStatus, PasswordComplexityResponse response)
+    {
+        var httpResponse = req.CreateResponse(httpStatus);
+        await httpResponse.WriteAsJsonAsync(response, new JsonObjectSerializer(new JsonSerializerOptions()
+        {
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+        }));
+        httpResponse.StatusCode = httpStatus;
+        return httpResponse;
     }
 }
