@@ -23,12 +23,16 @@ public class PasswordComplexity
     {
         var response = new PasswordComplexityResponse();
 
-        if (!string.IsNullOrEmpty(passwordComplexityRequest.Fullname))
+        if (passwordComplexityRequest?.Sources?.Length > 0)
         {
-            var similatity = response.similatity = LevenshteinDistance(passwordComplexityRequest.Password, passwordComplexityRequest.Fullname);
-            if (similatity < 0.5)
+            foreach (var source in passwordComplexityRequest.Sources)
             {
-                return await CreateResponse(req, HttpStatusCode.BadRequest, response);
+                var similatity = LevenshteinDistance(passwordComplexityRequest.Password, source);
+                if (similatity < 0.5)
+                {
+                    response.similatity = similatity;
+                    return await CreateResponse(req, HttpStatusCode.BadRequest, response);
+                }
             }
         }
 
