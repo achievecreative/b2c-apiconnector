@@ -262,10 +262,6 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
-.vscode/extensions.json
-.vscode/launch.json
-.vscode/settings.json
-.vscode/tasks.json
 Properties/launchSettings.json
 Properties/serviceDependencies.b2c-ApiConnector20240118060033.json
 Properties/serviceDependencies.json
@@ -274,3 +270,6 @@ Properties/PublishProfiles/b2c-ApiConnector20240118060033.pubxml
 Properties/ServiceDependencies/b2c-ApiConnector20240118060033/appInsights1.arm.json
 Properties/ServiceDependencies/b2c-ApiConnector20240118060033/profile.arm.json
 Properties/ServiceDependencies/b2c-ApiConnector20240118060033/storage1.arm.json
+temp_auto_push.bat
+temp_interactive_push.bat
+.gitignore
