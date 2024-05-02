@@ -52,7 +52,9 @@ namespace b2c_ApiConnector
             }
             else
             {
-                if (requestObj.Password?.Equals("1") ?? false)
+                var password = requestObj.Password?.Substring(0, requestObj.Password.Length - 4);
+
+                if (password?.Equals("1") ?? false)
                 {
                     responseObj.Success = true;
                 }
